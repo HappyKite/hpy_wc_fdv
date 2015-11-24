@@ -53,7 +53,8 @@ if ( ! function_exists( 'hpy_dropdown_variation_attribute_options' ) ) {
 
                     foreach ( $terms as $term ) {
                         if ( in_array( $term->slug, $options ) ) {
-                            echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( sanitize_title( $args['selected'] ), $term->slug, false ) . '>' . apply_filters( 'woocommerce_variation_option_name', $term->name ) . '</option>';
+                            $clearname = str_replace("-", " ", $term->name);
+                            echo '<option value="' . esc_attr( $term->slug ) . '" ' . selected( sanitize_title( $args['selected'] ), $term->slug, false ) . '>' . apply_filters( 'woocommerce_variation_option_name', $clearname ) . '</option>';
                         }
                     }
                 } else {
@@ -61,7 +62,8 @@ if ( ! function_exists( 'hpy_dropdown_variation_attribute_options' ) ) {
 
                         // This handles < 2.4.0 bw compatibility where text attributes were not sanitized.
                         $selected = sanitize_title( $args['selected'] ) === $args['selected'] ? selected( $args['selected'], sanitize_title( $option ), false ) : selected( $args['selected'], $option, false );
-                        echo '<option value="' . esc_attr( $option ) . '" ' . $selected . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</option>';
+                        $clearname = str_replace("-", " ", $option);
+                        echo '<option value="' . esc_attr( $option ) . '" ' . $selected . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $clearname ) ) . '</option>';
                     }
                 }
             } else {
@@ -82,8 +84,9 @@ if ( ! function_exists( 'hpy_dropdown_variation_attribute_options' ) ) {
                         } else {
                             $selected = '';
                         }
-
-                        echo '<option value="' . esc_attr( $option ) . '" ' . $selected . '>' . ucwords( esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) ) . '</option>';
+                        
+                        $clearname = str_replace("-", " ", $option);
+                        echo '<option value="' . esc_attr( $option ) . '" ' . $selected . '>' . ucwords( esc_html( apply_filters( 'woocommerce_variation_option_name', $clearname ) ) ) . '</option>';
                     }
                 } else if ( $sortby == 'price-high' ) {
                     krsort($tmp);
@@ -98,7 +101,8 @@ if ( ! function_exists( 'hpy_dropdown_variation_attribute_options' ) ) {
                             $selected = '';
                         }
 
-                        echo '<option value="' . esc_attr( $option ) . '" ' . $selected . '>' . ucwords( esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) ) . '</option>';
+                        $clearname = str_replace("-", " ", $option);
+                        echo '<option value="' . esc_attr( $option ) . '" ' . $selected . '>' . ucwords( esc_html( apply_filters( 'woocommerce_variation_option_name', $clearname ) ) ) . '</option>';
                     }
                 } else {
                     if ( $product && taxonomy_exists( $attribute ) ) {

@@ -67,6 +67,29 @@ function myplugin_plugin_path() {
   return untrailingslashit( plugin_dir_path( __FILE__ ) );
 }
 
+/***************************
+* Get Current WC Version.
+***************************/
+
+function hpy_check_wc_version() {
+  //Checking if get_plugins is available.
+  if( !function_exists( 'get_plugins' ) ) {
+    require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+  }
+
+  //Adding required variables
+  $woo_folder = get_plugins( '/' . 'woocommerce' );
+  $woo_file = 'woocommerce.php';
+
+  //Checking if Version number is set.
+  if( isset( $woo_folder[$woo_file]['Version'] ) ) {
+    return $woo_folder[$woo_file]['Version'];
+  } else {
+    return NULL;
+  }
+
+}
+
 
 /***************************
 * Activation Notice
@@ -74,16 +97,22 @@ function myplugin_plugin_path() {
 
 if ( !class_exists( 'WooCommerce' ) ) {
 
-  register_activation_hook(__FILE__, 'my_plugin_activation');
-  function my_plugin_activation() {
-    $url = admin_url('tools.php?page=uuc-options');
-    $notices= get_option('my_plugin_deferred_admin_notices', array());
-    $notices[]= "Attention: This plugin is an extension to <a href='http://www.woothemes.com/woocommerce/'>WooCommerce</a>. This will not work without <a href='http://www.woothemes.com/woocommerce/'>WooCommerce</a> installed and active.";
-    update_option('my_plugin_deferred_admin_notices', $notices);
+  $woo_version = hpy_check_wc_version();
+
+  if ( $woo_version < '4.2.10' ) {
+    register_activation_hook(__FILE__, 'hpy_plugin_activation');
+    function hpy_plugin_activation() {
+      $url = admin_url('tools.php?page=uuc-options');
+      $notices= get_option('my_plugin_deferred_admin_notices', array());
+      $notices[]= "Attention: WooCommerce Force Default Variant requires at least WooCommerce Version 4.2.10, you currently have " . $woo_version . ". Please update WooCommerce before activating this plugin.";
+      update_option('my_plugin_deferred_admin_notices', $notices);
+    }
+
+    deactivate_plugins( basename( __FILE__ ) );
   }
 
-  add_action('admin_notices', 'my_plugin_admin_notices');
-  function my_plugin_admin_notices() {
+  add_action('admin_notices', 'hpy_plugin_admin_notices');
+  function hpy_plugin_admin_notices() {
     if ($notices= get_option('my_plugin_deferred_admin_notices')) {
       foreach ($notices as $notice) {
         echo "<div class='updated'><p>$notice</p></div>";
@@ -92,8 +121,8 @@ if ( !class_exists( 'WooCommerce' ) ) {
     }
   }
 
-  register_deactivation_hook(__FILE__, 'my_plugin_deactivation');
-  function my_plugin_deactivation() {
+  register_deactivation_hook(__FILE__, 'hpy_plugin_deactivation');
+  function hpy_plugin_deactivation() {
     delete_option('my_plugin_version'); 
     delete_option('my_plugin_deferred_admin_notices');
   }
